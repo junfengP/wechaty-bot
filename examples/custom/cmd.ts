@@ -8,6 +8,11 @@ export interface CustomCommand {
     consume(msg: PUPPET.payload.Message, puppet: PuppetXp): any;
 }
 
+export interface CustomCommandWithArgs {
+    matchCommand(cmd: string): boolean;
+    consume(msg: PUPPET.payload.Message, puppet: PuppetXp): any;
+}
+
 export class HelpCommand implements CustomCommand{
     cmdName(): string {
         return "帮助";

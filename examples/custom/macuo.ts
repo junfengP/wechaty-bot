@@ -33,7 +33,7 @@ class MacuoDailyData implements Serializable {
     cnt: number;
     constructor(json: any) {
         this.cnt = json["cnt"] || 0;
-        const data_json = JSON.parse(json["user_data"] || "{}");
+        const data_json = json["user_data"] || {};
         this.user_data = new Map();
         for(var k in data_json) {
             this.user_data.set(k, new MacuoPersonData(JSON.parse(data_json[k])))

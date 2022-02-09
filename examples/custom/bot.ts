@@ -3,9 +3,11 @@ import type * as PUPPET   from 'wechaty-puppet'
  import {
    PuppetXp,
  }               from '../../src/mod.js'
-import { CustomCommand, HelpCommand } from './cmd.js'
+import { CustomCommand, CustomCommandWithArgs, HelpCommand } from './cmd.js'
 import * as constant from './constant.js'
 import { MacuoUndoWinLoseCommand, MacuoWinLoseCommand, MacuoWinLoseRankCommand } from './macuo.js'
+import { StudyCheckCommand, StudyConfigCommand, StudyResultCommand } from './study.js'
+import { Utils } from './utils.js'
  
  /**
   *
@@ -122,10 +124,24 @@ import { MacuoUndoWinLoseCommand, MacuoWinLoseCommand, MacuoWinLoseRankCommand }
         }
         const cmd = cmdMap.get(cmdKey);
 
-        if(!cmd) {
-            await puppet.messageSendText(roomId! || fromId!, `cmd not found: ${cmdKey}`)
+        if(cmd) {
+          await cmd.consume(msg, puppet);
+          return; 
         }
-        await cmd.consume(msg, puppet);
+        let found = false;
+        cmdArr.forEach((cmd) => {
+            if(cmd.matchCommand(cmdKey)) {
+                found = true;
+                cmd.consume(msg, puppet);
+            }
+        })
+        if(!found) {
+            const hint = `cmd not found: ${cmdKey}`;
+            console.log(hint)
+            const hintToUser = hint.length > 20 ? hint.substring(0, 20) + "..." : hint;
+            await puppet.messageSendText(roomId! || fromId!, hintToUser);
+        }
+        
    } else {
         // no @bot
    }
@@ -150,6 +166,7 @@ import { MacuoUndoWinLoseCommand, MacuoWinLoseCommand, MacuoWinLoseRankCommand }
  
  `
  console.info(welcome)
+ console.info(Utils.getTodayDate())
 
  /**
   * 8. assemble commands
@@ -160,13 +177,21 @@ import { MacuoUndoWinLoseCommand, MacuoWinLoseCommand, MacuoWinLoseRankCommand }
     initCmdMap0(m, new HelpCommand());
     initCmdMap0(m, new MacuoWinLoseRankCommand());
     initCmdMap0(m, new MacuoUndoWinLoseCommand());
+    initCmdMap0(m, new StudyCheckCommand());
+    initCmdMap0(m, new StudyResultCommand());
  }
 
  function initCmdMap0(m: Map<string, any>, cmd: CustomCommand) {
      m.set(cmd.cmdName(), cmd);
  }
 
- const cmdMap = new Map();
+ function initCmdArr(arr: Array<CustomCommandWithArgs>) {
+   arr.push(new StudyConfigCommand());
+ }
+
+ const cmdMap = new Map<string, CustomCommand>();
+ const cmdArr = new Array<CustomCommandWithArgs>();
  initCmdMap(cmdMap);
+ initCmdArr(cmdArr);
 
  
