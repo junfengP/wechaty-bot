@@ -1,6 +1,7 @@
 cd D:\kulang_share\download\puppet-xp-main
 
 set NODE_SKIP_PLATFORM_CHECK=1
+set WEATHER_API_TOKEN=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBY2NvdW50SWQiOiI2NDAyNjgwMjQ4MmMzOWUwMzJiYmQ4OTE2MDE3M2JkZiJ9.CVowAb6QyS36Xn_bcDT2_hHIPGm0gq0uJaRTS2s2oUU
 
 npm start
 

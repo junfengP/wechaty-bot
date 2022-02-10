@@ -9,6 +9,8 @@ import type { CronEvent } from './cron.js'
 import { MacuoUndoWinLoseCommand, MacuoWinLoseCommand, MacuoWinLoseRankCommand } from './macuo.js'
 import { StudyCheckCommand, StudyCheckEvents, StudyConfigCommand, StudyResultCommand } from './study.js'
 import { Utils } from './utils.js'
+import { WeatherReportEvent } from './weather.js'
+import { WeiboHotBand } from './weibo.js'
  
  /**
   *
@@ -180,6 +182,7 @@ import { Utils } from './utils.js'
     initCmdMap0(m, new MacuoUndoWinLoseCommand());
     initCmdMap0(m, new StudyCheckCommand());
     initCmdMap0(m, new StudyResultCommand());
+    initCmdMap0(m, new WeiboHotBand());
  }
 
  function initCmdMap0(m: Map<string, any>, cmd: CustomCommand) {
@@ -205,6 +208,7 @@ cronEvents()
 function registerCronEvents() {
   // cronEventArr.push(new StudyCheckEvents({"hour": new Date().getHours(), "minute": new Date().getMinutes() + 1, "jobName": "study check", "roomName": "机器人测试群"}))
   cronEventArr.push(new StudyCheckEvents({"hour": 22, "minute": 30, "jobName": "study check", "roomName": "考研英语打卡群"}))
+  cronEventArr.push(new WeatherReportEvent({"hour": 6, "minute": 30, "jobName": "wether check", "roomName": "天胡", "city":"福州", "province":"福建"}));
 }
 async function cronEvents() {
   for(var event of cronEventArr) {
