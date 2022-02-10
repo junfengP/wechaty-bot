@@ -1,8 +1,8 @@
-import { config } from "process";
 import type { Message } from "wechaty-puppet/payload";
 import type PuppetXp from "../../src/puppet-xp";
 import type { CustomCommand, CustomCommandWithArgs } from "./cmd.js";
 import { botName } from "./constant.js";
+import { AbstractCronEvent, CronEvent } from "./cron.js";
 import { FilePersistant, Serializable } from "./persistant.js";
 import { Utils } from "./utils.js";
 
@@ -119,6 +119,12 @@ class StudyUtils {
         return "今日打卡情况\n\n" + result;  
     }
 
+    static getUncheckUsers(users: string[]): string[] {
+        return users.filter((user) => {
+            return this.studyData.getCheckResult(user) < this.studyConfig.getUserConfig(user);
+        })
+    }
+
 }
 
 export class StudyCheckCommand implements CustomCommand {
@@ -155,13 +161,14 @@ export class StudyResultCommand implements CustomCommand {
         }
         const users = await puppet.roomMemberList(roomId);
         const usernames = new Array();
-        await users.forEach(async (user) => {
-            const name = (await puppet.contactPayload(user)).name;
+        for(var i = 0; i < users.length; i++) {
+            const u = users[i]!;
+            const name = (await puppet.contactPayload(u)).name;
             if(name === botName) {
-                return;
+                continue;
             }
             usernames.push(name);
-        })
+        }
         const result = StudyUtils.getCheckResult(usernames);
         await puppet.messageSendText(roomId, result);
     }
@@ -175,7 +182,7 @@ export class StudyConfigCommand implements CustomCommandWithArgs {
         const fromId = msg.fromId!; 
         const roomId = msg.roomId!;
         const text = msg.text!;
-        const no_str = text.split("@")[0].replace("设定打卡", "").trim();
+        const no_str = text.split("@")[0]!.replace("设定打卡", "").trim();
         const no = parseInt(no_str);
         if(isNaN(no)) {
             await puppet.messageSendText(roomId, "参数错误");
@@ -185,5 +192,50 @@ export class StudyConfigCommand implements CustomCommandWithArgs {
         StudyUtils.updateConfig(user.name, no);
         StudyUtils.saveStudyConfig();
         await puppet.messageSendText(roomId, "设定成功");
+    }
+}
+
+export class StudyCheckEvents extends AbstractCronEvent {
+    roomName: string;
+    constructor(json: any) {
+        super(json);
+        this.roomName = json["roomName"];
+
+    }
+    async trigger0(puppet: PuppetXp) {
+        const room = await Utils.searchRoomByTopic(puppet, this.roomName);
+        if(!room) {
+            console.error(`Study Check Event, topic ${this.roomName} not found`);
+            return;
+        }
+        const roomId = room.id;
+        const users = room.memberIdList;
+        const userMap = new Map<string, string>();
+
+        const usernames = new Array();
+        for(var i = 0; i < users.length; i++) {
+            const uid = users[i]!;
+            const name = (await puppet.contactPayload(uid)).name;
+            if(name === botName) {
+                continue;
+            }
+            usernames.push(name);
+            userMap.set(name, uid);
+        }
+
+        const result = StudyUtils.getCheckResult(usernames);
+        await puppet.messageSendText(roomId, result);
+
+        const uncheckUsers = StudyUtils.getUncheckUsers(usernames);
+        if(uncheckUsers.length === 0) {
+            await puppet.messageSendText(roomId, "今日已全员打卡");
+        } else {
+            const uncheckUserIds = uncheckUsers.map((username) => {
+                return userMap.get(username)!
+            })
+            uncheckUserIds.forEach(id => console.log(`uncheck id: ${id}`));
+            await puppet.messageSendText(roomId, "请完成今日打卡\n@" + uncheckUsers.join(" @"));
+            // await puppet.messageSendText(roomId, "请完成今日打卡", uncheckUserIds);
+        }
     }
 }

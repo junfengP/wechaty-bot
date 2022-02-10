@@ -5,8 +5,9 @@ import type * as PUPPET   from 'wechaty-puppet'
  }               from '../../src/mod.js'
 import { CustomCommand, CustomCommandWithArgs, HelpCommand } from './cmd.js'
 import * as constant from './constant.js'
+import type { CronEvent } from './cron.js'
 import { MacuoUndoWinLoseCommand, MacuoWinLoseCommand, MacuoWinLoseRankCommand } from './macuo.js'
-import { StudyCheckCommand, StudyConfigCommand, StudyResultCommand } from './study.js'
+import { StudyCheckCommand, StudyCheckEvents, StudyConfigCommand, StudyResultCommand } from './study.js'
 import { Utils } from './utils.js'
  
  /**
@@ -103,10 +104,10 @@ import { Utils } from './utils.js'
        return;
    }
    const user = await puppet.contactPayload(fromId);
-   let logStr = `from: ${user.name}, text: ${text}`;
+   let logStr = `fromId: ${fromId}, from: ${user.name}, text: ${text}`;
    if(roomId != '') {
        const room = await puppet.roomPayload(roomId);
-       logStr = `room: ${room.topic}, ` + logStr;
+       logStr = `roomId: ${roomId}, room: ${room.topic}, ` + logStr;
    }
    console.log(logStr)
    if(botRe.test(text)) {
@@ -122,7 +123,7 @@ import { Utils } from './utils.js'
         if(cmdKey === "" && args.length >= 4) {
             cmdKey = "更新"
         }
-        const cmd = cmdMap.get(cmdKey);
+        const cmd = cmdMap.get(cmdKey!);
 
         if(cmd) {
           await cmd.consume(msg, puppet);
@@ -130,7 +131,7 @@ import { Utils } from './utils.js'
         }
         let found = false;
         cmdArr.forEach((cmd) => {
-            if(cmd.matchCommand(cmdKey)) {
+            if(cmd.matchCommand(cmdKey!)) {
                 found = true;
                 cmd.consume(msg, puppet);
             }
@@ -194,4 +195,20 @@ import { Utils } from './utils.js'
  initCmdMap(cmdMap);
  initCmdArr(cmdArr);
 
- 
+ /**
+  * 9. register cron events
+  */
+
+const cronEventArr = new Array<CronEvent>();
+registerCronEvents()
+cronEvents()
+function registerCronEvents() {
+  // cronEventArr.push(new StudyCheckEvents({"hour": new Date().getHours(), "minute": new Date().getMinutes() + 1, "jobName": "study check", "roomName": "机器人测试群"}))
+  cronEventArr.push(new StudyCheckEvents({"hour": 22, "minute": 30, "jobName": "study check", "roomName": "考研英语打卡群"}))
+}
+async function cronEvents() {
+  for(var event of cronEventArr) {
+    await event.trigger(puppet);
+  }
+  setTimeout(cronEvents, constant.CRON_TIMER_PERIOD);
+}
