@@ -6,7 +6,7 @@ import type * as PUPPET   from 'wechaty-puppet'
 import { CustomCommand, CustomCommandWithArgs, HelpCommand } from './cmd.js'
 import * as constant from './constant.js'
 import type { CronEvent } from './cron.js'
-import { MacuoUndoWinLoseCommand, MacuoWinLoseCommand, MacuoWinLoseRankCommand } from './macuo.js'
+import { MacuoUndoWinLoseCommand, MacuoWinLoseCommand, MacuoWinLoseRankCommand, MacuoMonthlyRankCommand, MacuoYearlyRankCommand } from './macuo.js'
 import { StudyCheckCommand, StudyCheckEvents, StudyConfigCommand, StudyResultCommand } from './study.js'
 import { Utils } from './utils.js'
 import { WeatherReportEvent } from './weather.js'
@@ -180,6 +180,8 @@ import { WeiboHotBand } from './weibo.js'
     initCmdMap0(m, new HelpCommand());
     initCmdMap0(m, new MacuoWinLoseRankCommand());
     initCmdMap0(m, new MacuoUndoWinLoseCommand());
+    initCmdMap0(m, new MacuoMonthlyRankCommand());
+    initCmdMap0(m, new MacuoYearlyRankCommand());
     initCmdMap0(m, new StudyCheckCommand());
     initCmdMap0(m, new StudyResultCommand());
     initCmdMap0(m, new WeiboHotBand());

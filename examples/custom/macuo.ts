@@ -22,6 +22,14 @@ class MacuoPersonData implements Serializable {
             this.cnt_lose += undo ? -1 : 1;
         }
     }
+    merge(data: MacuoPersonData) {
+        this.cnt_win += data.cnt_win
+        this.cnt_lose += data.cnt_lose
+    }
+
+    clone(): MacuoPersonData {
+        return new MacuoPersonData(this.toJson())
+    }
 
     toJson():string{
         return JSON.stringify(this);
@@ -58,6 +66,29 @@ class MacuoDailyData implements Serializable {
         json["cnt"] = this.cnt;
         return JSON.stringify(json)
     }
+
+    merge(data: MacuoDailyData) {
+        this.cnt += data.cnt
+        for(var v of this.user_data) {
+            const un = v[0];
+            const d = v[1];
+            if(data.user_data.has(un)) {
+                d.merge(data.user_data.get(un)!)
+            }
+        }
+        for(var v of data.user_data) {
+            const un = v[0];
+            const d = v[1];
+            if(!this.user_data.has(un)) {
+                this.user_data.set(un, d.clone())
+            }
+        }
+    }
+
+    clone(): MacuoDailyData{
+        return new MacuoDailyData(this.toJson())
+    }
+
     toArray(): Array<any> {
         let result = new Array();
         for(var v of this.user_data) {
@@ -167,6 +198,68 @@ class MacuoUtils {
         }
         return prefix + showStr;
     }
+
+    static showCurMonthWinLostRank():string {
+        const todayKey = Utils.getTodayStr();
+        const data = this.data.dailyRank.has(todayKey) ? this.data.dailyRank.get(todayKey)!.clone() : new MacuoDailyData({});
+    
+        const d = new Date();
+        const monthStr = `${d.getMonth() + 1}`
+        for(var date of this.data.dailyRank.keys()) {
+            if (date === todayKey) {
+                continue
+            }
+            if(!date.startsWith(monthStr + ".")) {
+                continue
+            }
+            data.merge(this.data.dailyRank.get(date)!)
+        }
+
+        if(data.cnt === 0 ) {
+            return "本月还没有麻将数据，请大家积极一点！"
+        }
+
+        const prefix = `${monthStr}月-输赢榜\n`
+        const dataArr = data.toArray();
+        let showStr = dataArr.filter((v)=> {
+            return v[1] != 0 || v[2] != 0;
+        }).slice(0, 10).map((v) => `${v[0]}: +${v[1]} -${v[2]}`).join("\n")
+
+        let bestVal = 0;
+        let worstVal = 0;
+        dataArr.forEach( (v) => {
+            if(v[1] > bestVal) {
+                bestVal = v[1];
+            }
+            if(v[2] > worstVal) {
+                worstVal = v[2];
+            }
+        });
+        const bestUser = new Array<string>();
+        const worstUser = new Array<string>();
+        dataArr.forEach((v) => {
+            if(v[1] === bestVal) {
+                bestUser.push(v[0]);
+            }
+            if(v[2] === worstVal) {
+                worstUser.push(v[0]);
+            }
+        })
+        if(bestVal > 0) {
+            showStr += `\n\n本月最旺: ${bestUser.join(" ")}`
+        }
+        if(worstVal > 0) {
+            showStr +=  `\n本月最霉: ${worstUser.join(" ")}`
+        }
+        if(data.cnt > 0) {
+            showStr += `\n本月局数：${data.cnt}`
+        }
+        return prefix + showStr;
+    }
+
+    static showCurYearWinLostRank():string {
+        return ""
+    }
 }
 
 class MacuoWinLoseCommand implements CustomCommand  {
@@ -250,4 +343,30 @@ class MacuoWinLoseRankCommand implements CustomCommand {
 
 }
 
-export {MacuoWinLoseCommand, MacuoWinLoseRankCommand, MacuoUndoWinLoseCommand}
+class MacuoMonthlyRankCommand implements CustomCommand {
+    cmdName(): string {
+        return "月度榜单";
+    }
+    async consume(msg: Message, puppet: PuppetXp) {
+        const roomId = msg.roomId || '';
+        await puppet.messageSendText(roomId, MacuoUtils.showCurMonthWinLostRank())
+    }
+}
+
+class MacuoYearlyRankCommand implements CustomCommand {
+    cmdName(): string {
+        return "年度榜单";
+    }
+    async consume(msg: Message, puppet: PuppetXp) {
+        const roomId = msg.roomId || '';
+        await puppet.messageSendText(roomId, MacuoUtils.showCurYearWinLostRank())
+    }
+}
+
+export {
+    MacuoWinLoseCommand, 
+    MacuoWinLoseRankCommand, 
+    MacuoUndoWinLoseCommand,
+    MacuoMonthlyRankCommand,
+    MacuoYearlyRankCommand
+}
