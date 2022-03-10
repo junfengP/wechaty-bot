@@ -258,7 +258,56 @@ class MacuoUtils {
     }
 
     static showCurYearWinLostRank():string {
-        return ""
+        const todayKey = Utils.getTodayStr();
+        const data = this.data.dailyRank.has(todayKey) ? this.data.dailyRank.get(todayKey)!.clone() : new MacuoDailyData({});
+    
+        for(var date of this.data.dailyRank.keys()) {
+            if (date === todayKey) {
+                continue
+            }
+            data.merge(this.data.dailyRank.get(date)!)
+        }
+
+        if(data.cnt === 0 ) {
+            return "本月还没有麻将数据，请大家积极一点！"
+        }
+
+        const prefix = `年度-输赢榜\n`
+        const dataArr = data.toArray();
+        let showStr = dataArr.filter((v)=> {
+            return v[1] != 0 || v[2] != 0;
+        }).slice(0, 10).map((v) => `${v[0]}: +${v[1]} -${v[2]}`).join("\n")
+
+        let bestVal = 0;
+        let worstVal = 0;
+        dataArr.forEach( (v) => {
+            if(v[1] > bestVal) {
+                bestVal = v[1];
+            }
+            if(v[2] > worstVal) {
+                worstVal = v[2];
+            }
+        });
+        const bestUser = new Array<string>();
+        const worstUser = new Array<string>();
+        dataArr.forEach((v) => {
+            if(v[1] === bestVal) {
+                bestUser.push(v[0]);
+            }
+            if(v[2] === worstVal) {
+                worstUser.push(v[0]);
+            }
+        })
+        if(bestVal > 0) {
+            showStr += `\n\n今年最旺: ${bestUser.join(" ")}`
+        }
+        if(worstVal > 0) {
+            showStr +=  `\n今年最霉: ${worstUser.join(" ")}`
+        }
+        if(data.cnt > 0) {
+            showStr += `\n今年局数：${data.cnt}`
+        }
+        return prefix + showStr;
     }
 }
 
