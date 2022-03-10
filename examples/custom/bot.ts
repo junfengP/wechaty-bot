@@ -207,7 +207,8 @@ registerCronEvents()
 cronEvents()
 function registerCronEvents() {
   // cronEventArr.push(new StudyCheckEvents({"hour": new Date().getHours(), "minute": new Date().getMinutes() + 1, "jobName": "study check", "roomName": "机器人测试群"}))
-  cronEventArr.push(new StudyCheckEvents({"hour": 22, "minute": 30, "jobName": "study check", "roomName": "考研英语打卡群"}))
+  cronEventArr.push(new StudyCheckEvents({"hour": 22, "minute": 30, "jobName": "study check", "roomName": "社会主义接班人学习打卡群"}))
+  cronEventArr.push(new StudyCheckEvents({"hour": 23, "minute": 59, "jobName": "study check", "roomName": "社会主义接班人学习打卡群"}))
   cronEventArr.push(new WeatherReportEvent({"hour": 6, "minute": 30, "jobName": "wether check", "roomName": "天胡", "city":"福州", "province":"福建"}));
 }
 async function cronEvents() {
