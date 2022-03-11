@@ -285,7 +285,7 @@ class MacuoUtils {
     static showTodayLuckyRank(): string {
         const dateKey = Utils.getTodayStr();
         const data = this.data.dailyRank.get(dateKey);
-        const prefix = `${dateKey}-大牌榜-天胡第一人：林垚\n\n`;
+        const prefix = `${dateKey}-大牌榜\n天胡第一人：林垚\n\n`;
         if(!data) {
             return prefix + "今日暂无数据，请大家加油";
         }
@@ -308,7 +308,7 @@ class MacuoUtils {
         if(luckResults === "") {
             return prefix + "今日暂无数据，请大家加油";
         }
-        return prefix + luckResults;
+        return prefix + luckResults + "\n";
     }
 
     static showTodayWinLoseRank():string {
