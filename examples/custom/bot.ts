@@ -6,7 +6,7 @@ import type * as PUPPET   from 'wechaty-puppet'
 import { CustomCommand, CustomCommandWithArgs, HelpCommand } from './cmd.js'
 import * as constant from './constant.js'
 import type { CronEvent } from './cron.js'
-import { MacuoLuckyCommand } from './macuo-ext.js'
+import { MacuoLuckyCommand, MacuoLuckyRankCommand } from './macuo-ext.js'
 import { MacuoUndoWinLoseCommand, MacuoWinLoseCommand, MacuoWinLoseRankCommand, MacuoMonthlyRankCommand, MacuoYearlyRankCommand } from './macuo.js'
 import { StudyCheckCommand, StudyCheckEvents, StudyConfigCommand, StudyResultCommand } from './study.js'
 import { Utils } from './utils.js'
@@ -195,6 +195,7 @@ import { WeiboHotBand } from './weibo.js'
     initCmdMap0(m, new StudyResultCommand());
     initCmdMap0(m, new WeiboHotBand());
     initCmdMap0(m, new MacuoLuckyCommand());
+    initCmdMap0(m, new MacuoLuckyRankCommand());
  }
 
  function initCmdMap0(m: Map<string, any>, cmd: CustomCommand) {

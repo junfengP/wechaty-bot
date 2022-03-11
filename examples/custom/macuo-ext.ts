@@ -30,7 +30,7 @@ async function updateLucky(msg: Message, puppet: PuppetXp) {
     }
     MacuoUtils.updateLucky(username, type, type.startsWith("撤销"))
     MacuoUtils.saveDailyRank()
-    await puppet.messageSendText(roomId, MacuoUtils.showTodayWinLoseRank())
+    await puppet.messageSendText(roomId, MacuoUtils.showTodayLuckyRank())
 }
 
 class MacuoLuckyCommand implements CustomCommand  {
@@ -42,7 +42,17 @@ class MacuoLuckyCommand implements CustomCommand  {
     }
 }
 
+class MacuoLuckyRankCommand implements CustomCommand  {
+    public cmdName(): string {
+        return "大牌榜单";
+    }
+    async consume(msg: Message, puppet: PuppetXp) {
+        const roomId = msg.roomId || '';
+        await puppet.messageSendText(roomId, MacuoUtils.showTodayWinLoseRank())
+    }
+}
 
 export {
-    MacuoLuckyCommand
+    MacuoLuckyCommand,
+    MacuoLuckyRankCommand
 }
