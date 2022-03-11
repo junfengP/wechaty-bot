@@ -291,7 +291,7 @@ class MacuoUtils {
         }
         const luckResults = this.luckyArr.map((type) => {
             const resultArr = [];
-            const pf = `------${type}------\n`
+            const pf = `\n---${type}---\n`
             for(var un of data.user_data.keys()) {
                 const v = data.getLuckyInfo(un, type);
                 if(v != 0) {
@@ -308,7 +308,7 @@ class MacuoUtils {
         if(luckResults === "") {
             return prefix + "今日暂无数据，请大家加油";
         }
-        return prefix + luckResults + "\n";
+        return prefix + luckResults;
     }
 
     static showTodayWinLoseRank():string {

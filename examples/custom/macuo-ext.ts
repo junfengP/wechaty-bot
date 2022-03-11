@@ -28,7 +28,7 @@ async function updateLucky(msg: Message, puppet: PuppetXp) {
         await puppet.messageSendText(roomId, reply);
         return
     }
-    MacuoUtils.updateLucky(username, type, type.startsWith("撤销"))
+    MacuoUtils.updateLucky(username, type.replace("撤销", ""), type.startsWith("撤销"))
     MacuoUtils.saveDailyRank()
     await puppet.messageSendText(roomId, MacuoUtils.showTodayLuckyRank())
 }
