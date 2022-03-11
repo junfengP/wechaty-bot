@@ -11,9 +11,27 @@ class MacuoPersonData implements Serializable {
     cnt_win: number;
     cnt_lose: number;
 
+    cnt_jinque: number;
+    cnt_qiangjin: number;
+    cnt_sanjindao: number;
+    cnt_jinkan: number;
+    cnt_jinlong: number;
+    cnt_tianhu: number;
+    cnt_qingyise: number;
+    cnt_hunyise: number;
+
     constructor(json: any) {
         this.cnt_win = json.cnt_win || 0;
         this.cnt_lose = json.cnt_lose || 0;
+
+        this.cnt_jinque = json.cnt_jinque || 0;
+        this.cnt_qiangjin = json.cnt_qiangjin || 0;
+        this.cnt_sanjindao = json.cnt_sanjindao || 0;
+        this.cnt_jinkan = json.cnt_jinkan || 0;
+        this.cnt_jinlong = json.cnt_jinlong || 0;
+        this.cnt_tianhu = json.cnt_tianhu || 0;
+        this.cnt_qingyise = json.cnt_qingyise || 0;
+        this.cnt_hunyise = json.cnt_hunyise || 0;
     }
     updateWinLose(win: boolean, undo=false) {
         if(win) {
@@ -22,9 +40,82 @@ class MacuoPersonData implements Serializable {
             this.cnt_lose += undo ? -1 : 1;
         }
     }
+
+    getLuckyInfo(type: string) {
+        var result = 0;
+        switch(type) {
+            case constant.MACUO_JINQUE:
+                result = this.cnt_jinque;
+                break;
+            case constant.MACUO_QIANGJIN:
+                result = this.cnt_qiangjin;
+                break;
+            case constant.MACUO_SANJINDAO:
+                result = this.cnt_sanjindao;
+                break;
+            case constant.MACUO_JINKAN:
+                result = this.cnt_jinkan;
+                break;
+            case constant.MACUO_JINLONG:
+                result = this.cnt_jinlong;
+                break;
+            case constant.MACUO_TIANHU:
+                result = this.cnt_tianhu;
+                break;
+            case constant.MACUO_QINGYISE:
+                result = this.cnt_qingyise;
+                break;
+            case constant.MACUO_HUNYISE:
+                result = this.cnt_hunyise;
+                break;
+        }
+        return result;
+    }
+
+    updateLucky(type: string, undo=false) {
+        const v = undo ? -1 : 1;
+        switch(type) {
+            case constant.MACUO_JINQUE:
+                this.cnt_jinque += v;
+                break;
+            case constant.MACUO_QIANGJIN:
+                this.cnt_qiangjin += v;
+                break;
+            case constant.MACUO_SANJINDAO:
+                this.cnt_sanjindao += v;
+                break;
+            case constant.MACUO_JINKAN:
+                this.cnt_jinkan += v;
+                break;
+            case constant.MACUO_JINLONG:
+                this.cnt_jinlong += v;
+                break;
+            case constant.MACUO_TIANHU:
+                this.cnt_tianhu += v;
+                break;
+            case constant.MACUO_QINGYISE:
+                this.cnt_qingyise += v;
+                break;
+            case constant.MACUO_HUNYISE:
+                this.cnt_hunyise += v;
+                break;
+            default:
+                throw new Error(`unsupport type: ${type} in lucky rank`)
+        }
+    }
+
     merge(data: MacuoPersonData) {
         this.cnt_win += data.cnt_win
         this.cnt_lose += data.cnt_lose
+
+        this.cnt_jinque += data.cnt_jinque
+        this.cnt_qiangjin += data.cnt_qiangjin
+        this.cnt_sanjindao += data.cnt_sanjindao
+        this.cnt_jinkan += data.cnt_jinkan
+        this.cnt_jinlong += data.cnt_jinlong
+        this.cnt_tianhu += data.cnt_tianhu
+        this.cnt_qingyise += data.cnt_qingyise
+        this.cnt_hunyise += data.cnt_hunyise
     }
 
     clone(): MacuoPersonData {
@@ -54,6 +145,22 @@ class MacuoDailyData implements Serializable {
             this.user_data.set(username, personData);
         }
         personData.updateWinLose(win, undo);
+    }
+    updateLucky(username: string, type: string, undo: boolean) {
+        let personData = this.user_data.get(username);
+        if(!personData) {
+            personData = new MacuoPersonData({})
+            this.user_data.set(username, personData);
+        }
+        personData.updateLucky(type, undo);
+    }
+
+    getLuckyInfo(username: string, type: string) {
+        let personData = this.user_data.get(username);
+        if(!personData) {
+            return 0;
+        }
+        return personData.getLuckyInfo(type);
     }
     toJson(): string {
         const data_json:{[k:string]: any} = {};
@@ -125,6 +232,16 @@ class MacuoData implements Serializable {
 
 class MacuoUtils {
     static data: MacuoData;
+    static luckyArr = [
+        constant.MACUO_QIANGJIN, 
+        constant.MACUO_SANJINDAO,
+        constant.MACUO_JINQUE,
+        constant.MACUO_TIANHU,
+        constant.MACUO_JINLONG,
+        constant.MACUO_JINKAN,
+        constant.MACUO_QINGYISE,
+        constant.MACUO_HUNYISE
+    ];
 
     static loadDailyRank() {
         const json = FilePersistant.loadFromFile(savefile);
@@ -145,6 +262,16 @@ class MacuoUtils {
         dailyData.updateWinLose(username, win, undo);
     }
 
+    static updateLucky(username: string, type: string, undo: boolean): void {
+        const todayStr = Utils.getTodayStr();
+        let dailyData = this.data.dailyRank.get(todayStr);
+        if(!dailyData) {
+            dailyData = new MacuoDailyData({});
+            this.data.dailyRank.set(todayStr, dailyData);
+        }
+        dailyData.updateLucky(username, type, undo);
+    }
+
     static updateDailyCount(undo: boolean): void {
         const todayStr = Utils.getTodayStr();
         let dailyData = this.data.dailyRank.get(todayStr);
@@ -153,6 +280,35 @@ class MacuoUtils {
             this.data.dailyRank.set(todayStr, dailyData);
         }
         dailyData.cnt += undo ? -1 : 1;
+    }
+
+    static showTodayLuckyRank(): string {
+        const dateKey = Utils.getTodayStr();
+        const data = this.data.dailyRank.get(dateKey);
+        const prefix = `${dateKey}-大牌榜-天胡第一人：林垚\n\n`;
+        if(!data) {
+            return prefix + "今日暂无数据，请大家加油";
+        }
+        const luckResults = this.luckyArr.map((type) => {
+            const resultArr = [];
+            const pf = `------${type}------\n`
+            for(var un of data.user_data.keys()) {
+                const v = data.getLuckyInfo(un, type);
+                if(v != 0) {
+                    resultArr.push([un, v]);
+                }
+            }
+            if(resultArr.length === 0) {
+                return "";
+            }
+            resultArr.sort((a: Array<any>, b: Array<any>) => Number(b[1] - a[1]));
+            return pf + resultArr.map((v) => `${v[0]}: ${v[1]}`).join("\n")
+        }).join("");
+
+        if(luckResults === "") {
+            return prefix + "今日暂无数据，请大家加油";
+        }
+        return prefix + luckResults;
     }
 
     static showTodayWinLoseRank():string {
@@ -417,5 +573,6 @@ export {
     MacuoWinLoseRankCommand, 
     MacuoUndoWinLoseCommand,
     MacuoMonthlyRankCommand,
-    MacuoYearlyRankCommand
+    MacuoYearlyRankCommand,
+    MacuoUtils
 }

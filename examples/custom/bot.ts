@@ -6,6 +6,7 @@ import type * as PUPPET   from 'wechaty-puppet'
 import { CustomCommand, CustomCommandWithArgs, HelpCommand } from './cmd.js'
 import * as constant from './constant.js'
 import type { CronEvent } from './cron.js'
+import { MacuoLuckyCommand } from './macuo-ext.js'
 import { MacuoUndoWinLoseCommand, MacuoWinLoseCommand, MacuoWinLoseRankCommand, MacuoMonthlyRankCommand, MacuoYearlyRankCommand } from './macuo.js'
 import { StudyCheckCommand, StudyCheckEvents, StudyConfigCommand, StudyResultCommand } from './study.js'
 import { Utils } from './utils.js'
@@ -116,7 +117,7 @@ import { WeiboHotBand } from './weibo.js'
         // contains @bot
         const args = text.trim().split("@");
         if(args.length <= 0) {
-                console.error(`wrong input: ${text}`)
+          console.error(`wrong input: ${text}`)
         }
         let cmdKey = args[0];
         if(cmdKey === "" && args.length === 2) {
@@ -137,7 +138,15 @@ import { WeiboHotBand } from './weibo.js'
                 found = true;
                 cmd.consume(msg, puppet);
             }
-        })
+        });
+        // 通过正则匹配试试
+        cmdMap.forEach((cmd, cmdNameReg) => {
+          const re = new RegExp(`^${cmdNameReg}$`)
+          if(re.test(cmdKey!)) {
+            found = true;
+            cmd.consume(msg, puppet);
+          }
+        });
         if(!found) {
             const hint = `cmd not found: ${cmdKey}`;
             console.log(hint)
@@ -185,6 +194,7 @@ import { WeiboHotBand } from './weibo.js'
     initCmdMap0(m, new StudyCheckCommand());
     initCmdMap0(m, new StudyResultCommand());
     initCmdMap0(m, new WeiboHotBand());
+    initCmdMap0(m, new MacuoLuckyCommand());
  }
 
  function initCmdMap0(m: Map<string, any>, cmd: CustomCommand) {
