@@ -48,7 +48,7 @@ class MacuoLuckyRankCommand implements CustomCommand  {
     }
     async consume(msg: Message, puppet: PuppetXp) {
         const roomId = msg.roomId || '';
-        await puppet.messageSendText(roomId, MacuoUtils.showTodayWinLoseRank())
+        await puppet.messageSendText(roomId, MacuoUtils.showTodayLuckyRank())
     }
 }
 
