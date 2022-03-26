@@ -2,6 +2,8 @@ import type { CustomCommand, CustomCommandWithArgs } from "./cmd.js";
 import type { Message } from "wechaty-puppet/payload";
 import type PuppetXp from "../../src/puppet-xp";
 import { got } from "got";
+import { AbstractCronEvent } from "./cron.js";
+import { Utils } from "./utils.js";
 
 class WeiboUtils {
     static async fetchWeiboHotBand():Promise<string> {
@@ -36,4 +38,21 @@ export class WeiboHotBand implements CustomCommand {
         await puppet.messageSendText(roomId, await WeiboUtils.fetchWeiboHotBand());
     }
 
+}
+
+export class WeiboReportEvent extends AbstractCronEvent {
+    roomName: string;
+    constructor(json: any) {
+        super(json);
+        this.roomName = json["roomName"];
+    }
+    async trigger0(puppet: PuppetXp) {
+        const room = await Utils.searchRoomByTopic(puppet, this.roomName);
+        if(!room) {
+            console.error(`Weibo Report Event, topic ${this.roomName} not found`);
+            return;
+        }
+        const roomId = room.id;
+        await puppet.messageSendText(roomId, await WeiboUtils.fetchWeiboHotBand());
+    }
 }

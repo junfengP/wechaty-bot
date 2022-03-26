@@ -11,7 +11,7 @@ import { MacuoUndoWinLoseCommand, MacuoWinLoseCommand, MacuoWinLoseRankCommand, 
 import { StudyCheckCommand, StudyCheckEvents, StudyConfigCommand, StudyResultCommand } from './study.js'
 import { Utils } from './utils.js'
 import { WeatherReportEvent } from './weather.js'
-import { WeiboHotBand } from './weibo.js'
+import { WeiboHotBand, WeiboReportEvent } from './weibo.js'
  
  /**
   *
@@ -223,6 +223,8 @@ function registerCronEvents() {
   cronEventArr.push(new StudyCheckEvents({"hour": 22, "minute": 30, "jobName": "study check", "roomName": "社会主义接班人学习打卡群"}))
   cronEventArr.push(new StudyCheckEvents({"hour": 23, "minute": 59, "jobName": "study check", "roomName": "社会主义接班人学习打卡群"}))
   cronEventArr.push(new WeatherReportEvent({"hour": 6, "minute": 30, "jobName": "wether check", "roomName": "天胡", "city":"福州", "province":"福建"}));
+  cronEventArr.push(new WeiboReportEvent({"hour": 12, "minute": 0, "jobName": "weibo hot band report", "roomName": "天胡"}));
+  cronEventArr.push(new WeiboReportEvent({"hour": 21, "minute": 0, "jobName": "weibo hot band report", "roomName": "天胡"}));
 }
 async function cronEvents() {
   for(var event of cronEventArr) {
