@@ -46,6 +46,9 @@ class AutoReplyRule implements Serializable{
             default:
                 throw new Error(`unsupport moe: ${this.mode} in auto reply`);
         }
+        if(matched) {
+            console.log(`trigger auto reply, keyword: ${this.keyword}, text: ${text}`)
+        }
         return matched;
     }
 
