@@ -8,6 +8,7 @@ import * as constant from './constant.js'
 import type { CronEvent } from './cron.js'
 import { MacuoLuckyCommand, MacuoLuckyRankCommand } from './macuo-ext.js'
 import { MacuoUndoWinLoseCommand, MacuoWinLoseCommand, MacuoWinLoseRankCommand, MacuoMonthlyRankCommand, MacuoYearlyRankCommand } from './macuo.js'
+import { AutoReply } from './reply.js'
 import { StudyCheckCommand, StudyCheckEvents, StudyConfigCommand, StudyResultCommand } from './study.js'
 import { Utils } from './utils.js'
 import { WeatherReportEvent } from './weather.js'
@@ -156,6 +157,7 @@ import { WeiboHotBand, WeiboReportEvent } from './weibo.js'
         
    } else {
         // no @bot
+      await autoreply.process(msg, puppet);
    }
 
 
@@ -232,3 +234,8 @@ async function cronEvents() {
   }
   setTimeout(cronEvents, constant.CRON_TIMER_PERIOD);
 }
+
+/**
+ * 10. get auto reply
+ */
+const autoreply = new AutoReply()

@@ -14,18 +14,27 @@ export class FilePersistant {
     }
 
     static loadFromFile(filename: string):Object {
+        return this.loadFromFile0(filename, {});        
+    }
+
+    static loadFromFile0(filename: string, defaultVal: any):Object {
         try {
             const data = fs.readFileSync(filename).toString();
             if(data === "") {
-                return {};
+                return defaultVal;
             }
             return JSON.parse(data)
         } catch(error) {
             console.log(`load config ${filename} failed, err: ${error}`)
-            return {};
+            return defaultVal;
         }
         
     }
+
+    static loadArrayFromFile(filename: string): Object {
+        return this.loadFromFile0(filename, []);
+    }
+
     static converMapToJson(m: Map<string, any>):Object {
         const data_json:{[k:string]: any} = {};
         for(var k of m.keys()) {
