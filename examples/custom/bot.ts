@@ -8,6 +8,7 @@ import * as constant from './constant.js'
 import type { CronEvent } from './cron.js'
 import { MacuoLuckyCommand, MacuoLuckyRankCommand } from './macuo-ext.js'
 import { MacuoUndoWinLoseCommand, MacuoWinLoseCommand, MacuoWinLoseRankCommand, MacuoMonthlyRankCommand, MacuoYearlyRankCommand } from './macuo.js'
+import { FilePersistant } from './persistant.js'
 import { AutoReply } from './reply.js'
 import { StudyCheckCommand, StudyCheckEvents, StudyConfigCommand, StudyResultCommand } from './study.js'
 import { Utils } from './utils.js'
@@ -114,6 +115,9 @@ import { WeiboHotBand, WeiboReportEvent } from './weibo.js'
        logStr = `roomId: ${roomId}, room: ${room.topic}, ` + logStr;
    }
    console.log(logStr)
+   if (text.startsWith('<?xml version="1.0"?>')) {
+     FilePersistant.saveToFileText("debug.txt", text);
+   }
    if(botRe.test(text)) {
         // contains @bot
         const args = text.trim().split("@");

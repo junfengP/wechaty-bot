@@ -13,6 +13,12 @@ export class FilePersistant {
         })
     }
 
+    static saveToFileText(filename: string, text: string) {
+        fs.writeFile(filename, text, (err) => {
+            if (err) throw err;
+        })
+    }
+
     static loadFromFile(filename: string):Object {
         return this.loadFromFile0(filename, {});        
     }
