@@ -10,7 +10,7 @@ import { MacuoLuckyCommand, MacuoLuckyRankCommand } from './macuo-ext.js'
 import { MacuoUndoWinLoseCommand, MacuoWinLoseCommand, MacuoWinLoseRankCommand, MacuoMonthlyRankCommand, MacuoYearlyRankCommand } from './macuo.js'
 import { FilePersistant } from './persistant.js'
 import { AutoReply } from './reply.js'
-import { StudyCheckCommand, StudyCheckEvents, StudyConfigCommand, StudyResultCommand } from './study.js'
+import { StudyCheckCommand, StudyCheckEvents, StudyConfigCommand, StudyResultCommand, FineCommand, SetFineCommand, ListFineCommand} from './study.js'
 import { Utils } from './utils.js'
 import { WeatherReportEvent } from './weather.js'
 import { WeiboHotBand, WeiboReportEvent } from './weibo.js'
@@ -202,6 +202,8 @@ import { WeiboHotBand, WeiboReportEvent } from './weibo.js'
     initCmdMap0(m, new WeiboHotBand());
     initCmdMap0(m, new MacuoLuckyCommand());
     initCmdMap0(m, new MacuoLuckyRankCommand());
+    initCmdMap0(m, new FineCommand());
+    initCmdMap0(m, new ListFineCommand());
  }
 
  function initCmdMap0(m: Map<string, any>, cmd: CustomCommand) {
@@ -210,6 +212,7 @@ import { WeiboHotBand, WeiboReportEvent } from './weibo.js'
 
  function initCmdArr(arr: Array<CustomCommandWithArgs>) {
    arr.push(new StudyConfigCommand());
+   arr.push(new SetFineCommand());
  }
 
  const cmdMap = new Map<string, CustomCommand>();

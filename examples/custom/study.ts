@@ -5,9 +5,66 @@ import { botName } from "./constant.js";
 import { AbstractCronEvent, CronEvent } from "./cron.js";
 import { FilePersistant, Serializable } from "./persistant.js";
 import { Utils } from "./utils.js";
+import * as constant from "./constant.js";
 
 const savefile = "study.txt"
 const configfile = "study-config.txt"
+const fineFile = "fine.txt"
+const fineMoney = 5
+
+class FineData implements Serializable {
+    data: Map<string, number>;
+    constructor(json: any) {
+        this.data = new Map();
+        for(var k in json) {
+            this.data.set(k, json[k])
+        }
+    }
+    toJson(): string {
+        return JSON.stringify(FilePersistant.converMapToJson(this.data));
+    }
+    updateFine(username: string, cnt: number) {
+        this.data.set(username, (this.data.get(username) || 0) + cnt);
+    }
+    setFine(username: string, cnt: number) {
+        this.data.set(username, cnt);
+    }
+
+    getFineResult(): string {
+        var totalCnt = 0;
+        var result = "";
+        this.data.forEach((v, k) => {
+            totalCnt += v;
+            result += `${k}: ${v}\n`;
+        })
+        result = `截止至${Utils.getTodayStr()}积累群计费: ${totalCnt * fineMoney}元\n` + result
+        return result;
+    }
+}
+
+class FineDataUtils {
+    static data: FineData;
+    static loadFineData() {
+        const json = FilePersistant.loadFromFile(fineFile);
+        this.data = new FineData(json);
+    }
+
+    static saveFineData() {
+        FilePersistant.saveToFile(fineFile, this.data);
+    }
+
+    static getFineResult(): string {
+        return this.data.getFineResult();
+    }
+
+    static fine(username: string) {
+        this.data.updateFine(username, 1);
+    }
+
+    static setFine(username: string, cnt: number) {
+        this.data.setFine(username, cnt);
+    }
+}
 
 class StudyDailyData implements Serializable {
     data: Map<string, number>;
@@ -172,6 +229,70 @@ export class StudyResultCommand implements CustomCommand {
         const result = StudyUtils.getCheckResult(usernames);
         await puppet.messageSendText(roomId, result);
     }
+}
+
+export class ListFineCommand implements CustomCommand {
+    cmdName(): string {
+        return "查看罚款";
+    }
+    constructor() {
+        FineDataUtils.loadFineData();
+    }
+    async consume(msg: Message, puppet: PuppetXp) {
+        const roomId = msg.roomId!;
+        await puppet.messageSendText(roomId, FineDataUtils.getFineResult());
+    }
+
+}
+
+export class FineCommand implements CustomCommand {
+    cmdName(): string {
+        return "罚款";
+    }
+    async consume(msg: Message, puppet: PuppetXp) {
+        const roomId = msg.roomId || '';
+        const text = msg.text || '';
+
+        const args = text.trim().split("@");
+        const fineUsers = [];
+        for(var i = 1; i < args.length; i++) {
+            if(args[i]!.trim() === constant.botName) {
+                continue;
+            }
+            fineUsers.push(args[i]!.trim());
+        }
+        fineUsers.forEach((username) => {
+            FineDataUtils.fine(username);
+        })
+        FineDataUtils.saveFineData();
+        await puppet.messageSendText(roomId, FineDataUtils.getFineResult());
+    }
+
+}
+
+export class SetFineCommand implements CustomCommandWithArgs {
+    matchCommand(cmd: string): boolean {
+        return cmd.startsWith("设定罚款");
+    }
+    async consume(msg: Message, puppet: PuppetXp) {
+        const roomId = msg.roomId!;
+        const text = msg.text!;
+        const args = text.split("@");
+        if(args.length != 3) {
+            await puppet.messageSendText(roomId, "使用样例：设定罚款n@机宝@用户");
+        }
+        const fineUser = args[0]!.trim() === constant.botName ? args[1]!.trim() : args[0]!.trim();
+        const no_str = args[0]!.replace("设定打卡", "").trim();
+        const no = parseInt(no_str);
+        if(isNaN(no)) {
+            await puppet.messageSendText(roomId, "参数错误");
+            return;
+        }
+        FineDataUtils.setFine(fineUser, no);
+        FineDataUtils.saveFineData();
+        await puppet.messageSendText(roomId, "设定成功");
+    }
+
 }
 
 export class StudyConfigCommand implements CustomCommandWithArgs {
