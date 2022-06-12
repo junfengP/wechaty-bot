@@ -282,7 +282,7 @@ export class SetFineCommand implements CustomCommandWithArgs {
             await puppet.messageSendText(roomId, "使用样例：设定罚款n@机宝@用户");
         }
         const fineUser = args[0]!.trim() === constant.botName ? args[1]!.trim() : args[0]!.trim();
-        const no_str = args[0]!.replace("设定打卡", "").trim();
+        const no_str = args[0]!.replace("设定罚款", "").trim();
         const no = parseInt(no_str);
         if(isNaN(no)) {
             await puppet.messageSendText(roomId, "参数错误");
